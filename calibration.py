@@ -5,9 +5,6 @@ import numpy as np
 import cv2
 import glob
 
-import numpy as np
-import cv2
-import glob
 
 # Parametri sahovske table
 ROWS = 6
@@ -53,19 +50,13 @@ def calibrate_camera():
     ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(
         object_points_array, image_points_array, gray.shape[::-1], None, None
     )
-
-    # cuvanje parametara kamere
-    np.savez('camera_cal/calibration_data.npz', mtx=mtx, dist=dist, rvecs=rvecs, tvecs=tvecs)
-
     
     total_error = compute_calibration_error(
         object_points_array, image_points_array, rvecs, tvecs, mtx, dist
     )
 
-    print(f"Total calibration error: {total_error}")
     return mtx, dist
 
-# Izracunavanje greske
 def compute_calibration_error(object_points_array, image_points_array, rvecs, tvecs, mtx, dist):
     total_error = 0
     for i in range(len(object_points_array)):
@@ -74,5 +65,18 @@ def compute_calibration_error(object_points_array, image_points_array, rvecs, tv
         total_error += error
     return total_error / len(object_points_array)
 
-#if __name__ == "__main__":
- #  mtx, dist = calibrate_camera()
+
+
+def undistort_image(img, camera_matrix, distortion_coeffs):
+   
+    if img is None:
+        raise ValueError("Slika nije ucitana")
+    
+    if not isinstance(camera_matrix, np.ndarray) or not isinstance(distortion_coeffs, np.ndarray):
+        raise TypeError("Matrica i koeficijenti nisu validni")
+
+    undistorted = cv2.undistort(img, camera_matrix, distortion_coeffs, None, camera_matrix)
+    
+    return undistorted
+
+
